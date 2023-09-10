@@ -5,7 +5,7 @@
 //  Created by Sherine Antoun on 4/21/20.
 //  Copyright © 2020 Sherine Antoun. All rights reserved.
 //
-
+// Edited by Patrick MacInnes
 #include <iostream>
 #include "Elevator.h"
 // constructor for number of floors - no default constructor
