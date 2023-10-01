@@ -1,7 +1,8 @@
 #pragma once
 #include "BankAccount.h"
 
-class SavingsAccount : public BankAccount {
+class SavingsAccount : public BankAccount 
+{
 public:
     SavingsAccount(int accountNumber, double balance, double interestRate);
     void setInterestRate(double rate);

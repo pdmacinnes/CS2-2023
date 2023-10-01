@@ -1,6 +1,8 @@
+// I read online that #pragma once replaces ifndef, define and endif so I'm using it in this program
 #pragma once
 
-class BankAccount {
+class BankAccount 
+{
 public:
     BankAccount(int accountNumber, double balance);
     int getAccountNumber() const;
@@ -11,7 +13,7 @@ public:
 
 protected:
     double balance;
-    
+
 private:
     int accountNumber;
     
