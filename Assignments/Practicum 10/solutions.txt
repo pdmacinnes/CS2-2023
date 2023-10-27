@@ -1,0 +1,6 @@
+a) student* studentArray = new student[n];
+
+b) The new operator may return nullptr or throw an exception (std::bad_alloc).
+Code to check if the allocation succeeded is provided in the program.
+
+c) delete[] studentArray;
