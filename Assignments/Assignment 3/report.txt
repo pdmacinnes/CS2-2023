@@ -1,0 +1,30 @@
+Here's how the program works:
+
+It defines two classes: Student as the base class and GraduateStudent as the derived class that inherits from Student. GraduateStudent has an additional attribute, ResearchTopic.
+It implements a templated class, StudentDatabase, which can manage databases of both regular students and graduate students.
+The program allows the user to perform various operations:
+Add a student to the database.
+Delete a student by providing the Student ID.
+Search for a student by their ID and display their information.
+Shuffle the order of students randomly.
+Display a list of all students and their details.
+Edit a student's GPA based on the Student ID.
+Sort the students in ascending order of their Student ID using the Quick Sort algorithm.
+Save the database to a file.
+Load data from a file.
+The program provides exception handling to handle errors. It also uses proper file I/O to save and load data.
+
+Challenges Faced:
+
+Correctly opening, closing, and handling file operations can be complex. In the code, the fstream object was managed properly to open, close, save, and load data to/from a file.
+The code needed to correctly separate the data for regular students and graduate students when saving and loading from files. This required the use of delimiters like '\t' to distinguish different attributes.
+The code utilizes try-catch blocks for handling exceptions such as file I/O errors and invalid user inputs. This helps the program handle unexpected issues better.
+Defining the base class Student and the derived class GraduateStudent required careful consideration of attributes and methods. Additionally, proper downcasting was used to access derived class attributes in the displayAllStudents function.
+Building the user interface and handling user inputs was important. The program uses a menu-based system to interact with the user, ensuring user-friendly operation.
+For the saveDataToFile and loadDataFromFile functions I had to search the internet for help and I lost my sources.
+
+Issues that make the code incomplete:
+
+searchStudent function doesn't work.
+editStudentGPA function doesn't work.
+When adding, deleting, or displaying students students.dat file puts stuff in the wrong place
