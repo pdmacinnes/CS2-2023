@@ -1,234 +1,389 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <string>
 #include <stdexcept>
-#include <algorithm>
-#include <random>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+// #include <algorithm>
 
 using namespace std;
+
+// Custom implementation of a dynamic array
+template <typename T>
+class DynamicArray 
+{
+public:
+    DynamicArray() : data(nullptr), size(0), capacity(0) {}
+
+    ~DynamicArray() 
+    {
+        delete[] data;
+    }
+
+    void push_back(const T& value) 
+    {
+        if (size >= capacity) {
+            reserve(capacity * 2 + 1);
+        }
+        data[size++] = value;
+    }
+
+    void erase(int index) 
+    {
+        if (index < 0 || index >= size) 
+        {
+            throw out_of_range("Index out of bounds.");
+        }
+        for (int i = index; i < size - 1; ++i) 
+        {
+            data[i] = data[i + 1];
+        }
+        --size;
+    }
+
+    T& operator[](int index) {
+        if (index < 0 || index >= size) 
+        {
+            throw out_of_range("Index out of bounds.");
+        }
+        return data[index];
+    }
+
+    const T& operator[](int index) const 
+    {
+        if (index < 0 || index >= size) 
+        {
+            throw out_of_range("Index out of bounds.");
+        }
+        return data[index];
+    }
+
+    int getSize() const 
+    {
+        return size;
+    }
+
+private:
+    void reserve(int newCapacity) 
+    {
+        T* newData = new T[newCapacity];
+        for (int i = 0; i < size; ++i) 
+        {
+            newData[i] = data[i];
+        }
+        delete[] data;
+        data = newData;
+        capacity = newCapacity;
+    }
+
+    T* data;
+    int size;
+    int capacity;
+};
+
+class MyString 
+{
+public:
+    char* data;
+    int strLength; // Changed 'length' to 'strLength'
+
+    MyString() : data(nullptr), strLength(0) {}
+
+    MyString(const char* value) 
+    {
+        strLength = strlen(value);
+        data = new char[strLength + 1];
+        strcpy(data, value);
+    }
+
+    MyString(const MyString& other) : strLength(other.strLength) 
+    {
+        data = new char[strLength + 1];
+        strcpy(data, other.data);
+    }
+
+    MyString& operator=(const MyString& other) 
+    {
+        if (this != &other) 
+        {
+            delete[] data;
+            strLength = other.strLength;
+            data = new char[strLength + 1];
+            strcpy(data, other.data);
+        }
+        return *this;
+    }
+
+    ~MyString() 
+    {
+        delete[] data;
+    }
+
+    char& operator[](int index) 
+    {
+        if (index < 0 || index >= strLength) 
+        {
+            throw std::out_of_range("Index out of bounds.");
+        }
+        return data[index];
+    }
+
+    const char& operator[](int index) const 
+    {
+        if (index < 0 || index >= strLength) 
+        {
+            throw std::out_of_range("Index out of bounds.");
+        }
+        return data[index];
+    }
+
+    int strlength() const 
+    {
+        return strLength;
+    }
+};
+
 
 // Define a base class Student with attributes for Student ID, Name, and GPA.
 class Student 
 {
-    public:
-        int id;
-        string name;
-        float gpa;
+public:
+    int id;
+    MyString name;
+    float gpa;
 
-        // Constructor to initialize Student attributes
-        Student(int id, const string& name, float gpa) : id(id), name(name), gpa(gpa) {}
+    Student() : id(0), name(""), gpa(0.0f) {}
+
+    Student(int id, const std::string& name, float gpa) : id(id), name(name.c_str()), gpa(gpa) {}
+
+    Student(const Student& other) : id(other.id), name(other.name), gpa(other.gpa) {}
+
+    Student& operator=(const Student& other) 
+    {
+        if (this != &other) 
+        {
+            id = other.id;
+            name = other.name;
+            gpa = other.gpa;
+        }
+        return *this;
+    }
+
+    ~Student() {}
 };
+
+
 
 // Define a derived class GraduateStudent that inherits from the base class Student.
 class GraduateStudent : public Student 
 {
-    public:
-        string researchTopic;
+public:
+    MyString researchTopic;
 
-        // Constructor to initialize GraduateStudent attributes, including ResearchTopic.
-        GraduateStudent(int id, const string& name, float gpa, const string& researchTopic)
-            : Student(id, name, gpa), researchTopic(researchTopic) {}
+    // Constructor to initialize GraduateStudent attributes, including ResearchTopic.
+    GraduateStudent(int id, const char* name, float gpa, const char* researchTopic)
+    : Student(id, name, gpa), researchTopic() 
+    {
+    this->researchTopic = MyString(researchTopic);
+    }
 };
 
-// Define a templated data structure (class) for managing the student database.
+// Custom implementation of a templated data structure for managing the student database.
 template <typename T>
 class StudentDatabase 
 {
-    public:
-        StudentDatabase() 
-        {
-            loaded = false;
-        }
+public:
+    StudentDatabase()
+        : students(), file(), loaded(false) {}
 
-        ~StudentDatabase() 
-        {
-            if (loaded) 
-            {
-                saveDataToFile("students.dat");
-            }
+    ~StudentDatabase() 
+    {
+        if (loaded) {
+            saveDataToFile("students.dat");
         }
+    }
 
-        // Function to add a student to the database
-        void addStudent(const T& student) 
-        {
-            students.push_back(student);
-        }
+    void addStudent(const T& student) 
+    {
+        students.push_back(student);
+    }
 
-        // Function to delete a student from the database based on Student ID
-        void deleteStudent(int studentId) 
+    void deleteStudent(int studentId) 
+    {
+        int index = findStudentIndex(studentId);
+        if (index != -1) 
         {
-            auto it = std::remove_if(students.begin(), students.end(),
-                [studentId](const T& student) 
-                { return student.id == studentId; });
-            if (it != students.end()) 
-            {
-                students.erase(it, students.end());
-            } else 
-            {
-                throw invalid_argument("Student not found.");
-            }
-        }
-
-        // Function to search for a student by their ID
-        T searchStudent(int studentId) 
+            students.erase(index);
+        } else 
         {
-            for (const T& student : students) 
-            {
-                if (student.id == studentId) 
-                {
-                    return student;
-                }
-            }
             throw invalid_argument("Student not found.");
         }
+    }
 
-        // Function to sort students using the Quick Sort algorithm based on their Student ID
-        void quicksortStudents() 
+    T searchStudent(int studentId) const 
+    {
+        int index = findStudentIndex(studentId);
+        if (index != -1) 
         {
-            quicksort(students, 0, students.size() - 1);
-        }
-
-        void quicksort(vector<T>& students, int low, int high) 
-        {
-            if (low < high) 
-            {
-                int pivotIndex = partition(students, low, high);
-                quicksort(students, low, pivotIndex - 1);
-                quicksort(students, pivotIndex + 1, high);
-            }
-        }
-
-        int partition(vector<T>& students, int low, int high) 
-        {
-            T pivot = students[high];
-            int i = low - 1;
-            for (int j = low; j < high; j++) 
-            {
-                if (students[j].id < pivot.id) 
-                {
-                    i++;
-                    swap(students[i], students[j]);
-                }
-            }
-            swap(students[i + 1], students[high]);
-            return i + 1;
-        }
-
-        // Function to save the data to a file
-        void saveDataToFile(const string& filename) 
-        {
-            if (file.is_open()) 
-            {
-                file.close();
-            }
-            file.open(filename);
-            if (file) 
-            {
-                for (const T& student : students)
-                {
-                    // Save student information to the file, using '\t' as a delimiter
-                    file << student.id << '\t' << student.name << '\t' << student.gpa << endl;
-                }
-                file.close();
-            } else 
-            {
-                throw runtime_error("Failed to save data to the file.");
-            }
-        }
-
-        // Function to load data from a file
-        void loadDataFromFile(const string& filename) 
-        {
-            if (file.is_open()) 
-            {
-                file.close();
-            }
-            file.open(filename);
-            if (file) 
-            {
-                students.clear(); // Clear existing data
-
-                while (file) 
-                {
-                    int id;
-                    string name;
-                    float gpa;
-
-                    file >> id;  // Read student ID
-                    file.ignore();   // Consume the delimiter (tab character)
-                    getline(file, name, '\t');  // Read student name until the tab character
-                    file >> gpa;  // Read student GPA
-
-                    if (typeid(T) == typeid(GraduateStudent)) 
-                    {
-                        string researchTopic;
-                        file.ignore();   // Consume the delimiter (tab character)
-                        getline(file, researchTopic, '\t');  // Read research topic until the tab character
-                        students.push_back(GraduateStudent(id, name, gpa, researchTopic));
-                    } else 
-                    {
-                        students.push_back(Student(id, name, gpa));
-                    }
-                }
-                file.close();
-                loaded = true;
-            } else 
-            {
-                throw runtime_error("Failed to load data from the file.");
-            }
-        }
-
-        // Function to shuffle the order of students randomly
-        void shuffleStudents() 
-        {
-            std::random_device rd;
-            std::mt19937 g(rd());
-            std::shuffle(students.begin(), students.end(), g);
-        }
-
-        // Function to display all students and their details
-        void displayAllStudents() 
-        {
-            for (const T& student : students) 
-            {
-                cout << "Student ID: " << student.id << endl;
-                cout << "Name: " << student.name << endl;
-                cout << "GPA: " << student.gpa << endl;
-                if (typeid(T) == typeid(GraduateStudent)) 
-                {
-                    const GraduateStudent& gradStudent = static_cast<const GraduateStudent&>(student);
-                    cout << "Research Topic: " << gradStudent.researchTopic << endl;
-                }
-                cout << "--------------------------------" << endl;
-            }
-        }
-
-        // Function to edit a student's GPA
-        void editStudentGPA(int studentId, float newGPA) 
-        {
-            for (T& student : students) 
-            {
-                if (student.id == studentId) 
-                {
-                    student.gpa = newGPA;
-                    return;
-                }
-            }
+            return students[index];
+        } else {
             throw invalid_argument("Student not found.");
         }
+    }
 
-        // Function to close the file
-        void close() 
+    void quicksortStudents() 
+    {
+        quicksort(0, students.getSize() - 1);
+    }
+
+    void shuffleStudents() 
+    {
+        int n = students.getSize();
+        for (int i = n - 1; i > 0; --i) 
         {
-            file.close();
+            int j = rand() % (i + 1); // Generate a random index
+            swap(students[i], students[j]); // Swap elements at index i and j
+        }
+    }
+
+    void displayAllStudents() const 
+    {
+        for (int i = 0; i < students.getSize(); ++i) 
+        {
+            const T& student = students[i];
+            cout << "Student ID: " << student.id << endl;
+            cout << "Name: " << student.name[0] << endl; // Assuming single character names
+            cout << "GPA: " << student.gpa << endl;
+            if (typeid(T) == typeid(GraduateStudent)) 
+            {
+                const GraduateStudent& gradStudent = static_cast<const GraduateStudent&>(student);
+                cout << "Research Topic: " << gradStudent.researchTopic[0] << endl;
+            }
+            cout << "--------------------------------" << endl;
+        }
+    }
+
+    void editStudentGPA(int studentId, float newGPA) 
+    {
+        int index = findStudentIndex(studentId);
+        if (index != -1) 
+        {
+            students[index].gpa = newGPA;
+        } else {
+            throw invalid_argument("Student not found.");
+        }
+    }
+
+    void saveDataToFile(const char* filename) const 
+    {
+    FILE* file = fopen(filename, "wb");
+    if (file == nullptr) 
+    {
+        throw runtime_error("Unable to open file.");
+    }
+
+    int size = students.getSize();
+    fwrite(&size, sizeof(int), 1, file);
+
+    for (int i = 0; i < size; ++i) 
+    {
+        fwrite(&students[i].id, sizeof(int), 1, file);
+
+        int nameLength = students[i].name.strlength(); // Get length using MyString's size() method
+        fwrite(&nameLength, sizeof(int), 1, file);
+
+        // Write each character of MyString to the file
+        for (int j = 0; j < nameLength; ++j) 
+        {
+            fwrite(&students[i].name[j], sizeof(char), 1, file);
         }
 
-    private:
-        vector<T> students;
-        fstream file;
-        bool loaded;
+        fwrite(&students[i].gpa, sizeof(float), 1, file);
+    }
+
+    fclose(file);
+}
+
+
+    void loadDataFromFile(const char* filename) 
+    {
+        FILE* file = fopen(filename, "rb"); // Open file in binary read mode
+        if (file == nullptr) 
+        {
+            throw runtime_error("Unable to open file.");
+        }
+
+        int size;
+        fread(&size, sizeof(int), 1, file); // Read the number of students
+
+        for (int i = 0; i < size; ++i) 
+        {
+            int id;
+            fread(&id, sizeof(int), 1, file); // Read student ID
+
+            int nameLength;
+            fread(&nameLength, sizeof(int), 1, file); // Read name length
+
+            char* name = new char[nameLength + 1];
+            fread(name, sizeof(char), nameLength, file); // Read name
+            name[nameLength] = '\0';
+
+            float gpa;
+            fread(&gpa, sizeof(float), 1, file); // Read GPA
+
+            addStudent(T(id, name, gpa)); // Add student to the database
+
+            delete[] name;
+        }
+
+        fclose(file); // Close the file
+    }
+
+private:
+    DynamicArray<T> students;
+    fstream file;
+    bool loaded;
+
+    int findStudentIndex(int studentId) const 
+    {
+        for (int i = 0; i < students.getSize(); ++i) 
+        {
+            if (students[i].id == studentId) 
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void quicksort(int low, int high) 
+    {
+        if (low < high) 
+        {
+            int pivotIndex = partition(low, high);
+            quicksort(low, pivotIndex - 1);
+            quicksort(pivotIndex + 1, high);
+        }
+    }
+
+    int partition(int low, int high) 
+    {
+        T pivot = students[high];
+        int i = low - 1;
+
+        for (int j = low; j <= high - 1; j++) 
+        {
+            if (students[j].id < pivot.id) 
+            {
+                i++;
+                swap(students[i], students[j]);
+            }
+        }
+        swap(students[i + 1], students[high]);
+        return i + 1;
+    }
 };
+
 
 int main() 
 {
@@ -263,7 +418,7 @@ int main()
 
             if (choice >= '1' && choice <= '6') 
             {
-                cin.ignore();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input stream
             }
 
             switch (choice) 
@@ -307,7 +462,7 @@ int main()
                     {
                         Student foundStudent = regularStudents.searchStudent(searchId);
                         cout << "Student ID: " << foundStudent.id << endl;
-                        cout << "Name: " << foundStudent.name << endl;
+                        cout << "Name: " << foundStudent.name.data << endl;
                         cout << "GPA: " << foundStudent.gpa << endl;
                     } catch (const invalid_argument& e) 
                     {
