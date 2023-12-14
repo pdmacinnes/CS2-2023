@@ -1,0 +1,98 @@
+Final Assignment - Task Scheduler
+
+Task Class
+
+Constructor (pseudocode)
+Task(name, priority, duration, id){
+    this name = name;
+    this priority = priority;
+    this duration = duration;
+    this uniqueID = id;
+    this dependencies = empty set ()
+}
+// This Constructor initializes the attributes od the 'Task; object. The 'dependencies' attributes
+// is an empty set initially, indication the the task has no dependencies
+
+constructor:
+addTask(task) {
+    taskList.append(task);
+    taskSet.insert(task);
+}
+// This method will ad  a 'task' object to the Scheduler's internal 'tasklist' and 'taskSet.' the tasklist
+// is a list of all the task, while the taskSet is a set od 'Task' objects. This will allow for 
+// efficient management of dependencies. The 'taskSet' uses pointers to the 'Task' objects in the 'taskList'
+// to ensure that modifications to the 'Task' objects in the 'tasklist' are reflected in 'taskSet'
+
+* additional class functions below *
+
+addDependency(taskName, dependentTaskName) {
+    task = findTaskName(taskName)
+
+    if task is null or dependentTask is null {
+        printError
+    }
+    else {
+        task.dependencies.add(dependentTask)
+    }
+}
+//This method will establish a dependency between two task based in their names. It first searches
+// a 'task' object with the specified name using the 'FindTaskByName' method. If both the task are found, 
+// it will add a reference to the 'dependentTask' object to the 'dependencies' set of the 'Task" object.
+// If either task is not found, it prints an error.
+
+updatePriority(taskName, newPriority) {
+    task = FindTaskByName(taskName);
+
+    if task is null {
+        printError("task not found")
+    }
+    else {
+        task.priority = newPriority
+    }
+}
+// This methos will update the priority of the 'task' object based on its name and provided new
+// priority value. It first searches for the 'task' object with the specified name using the 'FindTaskByName'
+// method. If the task is found, it updates the priority of the 'task' object to the specified value.
+// Otherwise, an error is provided
+
+displayScheduleTask()
+{
+    for task in taskList {
+        printTaskDetails(task)
+    }
+}
+// Display the list of scheduled task bu iteration through the 'taskList' and printing each 'task' object by 
+// using the 'printTaskDetails' method. 
+
+displayCriticalPath() {
+    criticalTask = findCriticalTask();
+
+    if(criticalTask is null)
+    {
+        print("No task in schedule")
+    }
+    else {
+        printCriticalTaskDetails(criticalTask)
+    }
+}
+// Display the critical path of the schedule. It first identifies the critical task, which is the task 
+// that has the longest duration. If there is none, it'll print an error. Otherwise, it prints the details
+// of the critical task using the printCriticalTaskDetails() method.
+
+
+main() (Program Driver)
+
+
+// This is the main for the program. It first identifies the critical task
+// (the one with the longest duration). 
+
+Steps:
+1. Create a taskScheduler object. The program will initiate a TaskScheduler object, which will manage the collection of task and their priorities
+2. Define test objects: this program will create individual Task objects, and each representing a specific task with its name, priority, duration, and uniqueID
+3. Add task object to the Scheduler: This program will add each task object to the TaskScheduler object, allowing the scheduler to maintain the list of task and their relationships.
+4. Establish dependencies: the program will establish dependencies between tasks based on their names. This indicates that one task will be completed before another can start.
+5. Display scheduled task: This program will call the scheduler's displayScheduleTask() to print the list of all scheduled task along with their details.
+6. Remove a task: This program calls the scheduler's removeTask() to remove a specific task from the schedule based on it's name.
+7. update task priority: The program will call the scheduler's updatePriority() mehtod to modify the priority of a task based on its name and the provided priority value.
+8. Display updated schedule: This program will calll the scheduler's displayScheduleTask() method again to show the updated list of scheduled task to change.
+9. Display the critical path: This program will call the scheduler's displayCriticalPath() method to identify and display the critical path of the schedule, representing the sequence of task that determine the overall project duration.
